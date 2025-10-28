@@ -7,14 +7,13 @@ using UnityEditor.Experimental.GraphView;
 public class QuickBoostActionScript : MonoBehaviour
 {
     [Header("QuickBoost_設定")]
-    [SerializeField] float boostForce = 40f;
+    [SerializeField] float boostForce = 100f;
     [SerializeField] float boostDuration = 0.2f;
     [SerializeField] float cooldown = 2f;
     [SerializeField] float boostCost = 25f;
 
     Rigidbody rb;
     PlayerStateScript state;
-    PlayerController controller;
     
 
     bool boosting = false;
@@ -24,7 +23,6 @@ public class QuickBoostActionScript : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
         state = GetComponent<PlayerStateScript>();
-        controller = GetComponent<PlayerController>();
     }
 
     // Update is called once per frame
@@ -32,7 +30,8 @@ public class QuickBoostActionScript : MonoBehaviour
     {
         if (cooldownTimer > 0f)
         {
-            cooldownTimer = Math.Max(0f,cooldownTimer-Time.deltaTime);
+            //cooldownTimer = Math.Max(0f,cooldownTimer-Time.deltaTime);
+            cooldownTimer -= Time.deltaTime;
         }
     }
 
@@ -43,29 +42,31 @@ public class QuickBoostActionScript : MonoBehaviour
 
         float timer = 0f;
         rb.velocity = Vector3.zero;
-        var wait = new WaitForFixedUpdate();
-       
+
+
+        var wait = new WaitForFixedUpdate(); //物理タイミング
         while(timer < boostDuration)
         {
+　　　　　　timer += Time.fixedDeltaTime;
             rb.AddForce(dir.normalized * boostForce, ForceMode.VelocityChange);
             yield return wait;
-            timer += Time.fixedDeltaTime;
+            
         }
         boosting = false;
     }
 
     public void DoQuickBoost(Vector3 direction)
     {
-        if (boosting || cooldownTimer > 0f) return;
-        if (direction.sqrMagnitude<0.0001f)
+       if(boosting||cooldownTimer>0f)
         {
-            if (controller != null && controller.LastMoveDir.sqrMagnitude > 0.0001f)
-                direction = controller.LastMoveDir;
-            else
-                direction = transform.forward;
+            return;
         }
-        //ブースト消費できないならキャンセル
-        if (!state || !state.SpendBoost(boostCost)) return;
+
+       if(state==null||!state.SpendBoost(boostCost))
+        {
+            return;
+        }
+
         StartCoroutine(BoostRoutine(direction));
     }
 

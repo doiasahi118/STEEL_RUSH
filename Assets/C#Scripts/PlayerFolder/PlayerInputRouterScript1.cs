@@ -36,7 +36,7 @@ public class PlayerInputRoutineScript : MonoBehaviour
     [SerializeField] string fireActionName = "Fire";
 
     //取得したアクションの参照
-    InputAction actFire, actReload, actQuickBoost, actRepair, actLookOnToggle, actLookOnNext, actInteract,actMeleeAttack;
+    InputAction actFire, actReload, actQuickBoost, actRepair, actLookOnToggle, actLookOnNext, actInteract, actMeleeAttack;
 
     private void Awake()
     {
@@ -121,7 +121,7 @@ public class PlayerInputRoutineScript : MonoBehaviour
 
         //現在の移動方向(または前方)を取得
         Vector3 dir = controller != null && controller.LastMoveDir.sqrMagnitude > 0.0001f
-        ?controller.LastMoveDir
+        ? controller.LastMoveDir
         : transform.forward;
 
         //クイックブースト実行
@@ -130,14 +130,72 @@ public class PlayerInputRoutineScript : MonoBehaviour
 
     static InputAction FindAndEnable(InputActionMap map, string actionName)
     {
-        if (map==null || string.IsNullOrEmpty(actionName)) return null;
+        if (map == null || string.IsNullOrEmpty(actionName)) return null;
         var act = map.FindAction(actionName, throwIfNotFound: false);
         if (act == null)
         {
             Debug.LogWarning($"[InputRouter]Action'{actionName}'が見つかりません");
-                return null;
+            return null;
         }
         act.Enable();
         return act;
     }
 }
+
+//using System;
+//using UnityEngine;
+//using UnityEngine.InputSystem;
+
+//public class PlayerInputRoutineScript : MonoBehaviour
+//{
+//    PlayerInput input;
+//    [Header("Receivers")]
+//    [SerializeField] PlayerController controller;
+//    [SerializeField] QuickBoostActionScript quickBoost;
+//    [SerializeField] LookOnActionScript lockOn;
+//    [SerializeField] PlayerStateScript state;
+//    [SerializeField] BoostActionScript booster;
+//    [SerializeField] ShotScript shooter;
+//    [SerializeField] MeleeScript melee;
+
+//    [Header("Action_Name")]
+//    [SerializeField] string fireActionName = "Fire";
+//    [SerializeField] string quickBoostActionName = "QuickBoost";
+//    [SerializeField] string reloadActionName = "Reload";
+//    [SerializeField] string repairActionName = "Repair";
+//    [SerializeField] string lookOnNextName = "LookOnNext";
+//    [SerializeField] string lookOnPrevName = "LookOn";
+//    [SerializeField] string meleeActionName = "MeleeAttack";
+
+//    InputAction actFire, actReload, actQuickBoost, actRepair, actMelee, actLookOn, actLookOnNext;
+
+//    void Awake()
+//    {
+//        //安全に参照
+//        input ??= GetComponent<PlayerInput>();
+//        controller ??= GetComponent<PlayerController>();
+//        booster ??= GetComponent<BoostActionScript>();
+//        quickBoost ??= GetComponent<QuickBoostActionScript>();
+//        lockOn ??= GetComponent<LookOnActionScript>();
+//        shooter ??= GetComponent<ShotScript>();
+//        state ??= GetComponent<PlayerStateScript>();
+//        melee ??= GetComponent<MeleeScript>();
+//    }
+
+//    void OnEnable()
+//    {
+//        //有効なActionMapを取得
+//        var map = input?.currentActionMap;
+//        if(map==null)
+//        {
+//            Debug.LogWarning("[InputRouter]NO_ActionMap");
+//            return;
+//        }
+//    //各アクションマップを検索＆購読
+//    actFire =Subsct
+//    }
+
+
+
+
+//}
