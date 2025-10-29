@@ -13,8 +13,9 @@ using static UnityEngine.InputSystem.DefaultInputActions;
 [RequireComponent(typeof(PlayerInput))]
 public class PlayerController : MonoBehaviour
 {
-    [SerializeField] private float moveSpeed ; //移動速度
-    [SerializeField] private float jumpHeight ;//ジャンプの高さ
+    [SerializeField] BoostActionScript boostAction;
+    [SerializeField] private float moveSpeed; //移動速度
+    [SerializeField] private float jumpHeight;//ジャンプの高さ
     [HideInInspector] public float SpeedMultiplier = 1f;
     private CharacterController characterController;//キャラクターコントローラーのキャッシュ
     private Transform _transform; //transformのキャッシュ
@@ -22,24 +23,59 @@ public class PlayerController : MonoBehaviour
     private Vector3 _moveVelocity; //キャラの移動情報
     private InputAction _move; //移動アクション
     private InputAction _jump; //ジャンプアクション
-    public Vector3 LastMoveDir { get; private set; }=Vector3.forward;
-   PlayerStateScript state;
+    public Vector3 LastMoveDir { get; private set; } = Vector3.forward;
+    public Vector3 ExternalVelocity { get; private set; } = Vector3.zero;
+    Coroutine impulseCo;
+
+    PlayerStateScript state;
 
     // Start is called before the first frame update
     void Start()
     {
         state = GetComponent<PlayerStateScript>();
+        boostAction = GetComponent<BoostActionScript>();
         characterController = GetComponent<CharacterController>();
-     //毎フレームアクセスするので、負荷を下げるためにキャッシュしておく
-     _transform = transform;//Transformもキャッシュすると少しだけ負荷が下がる
+        //毎フレームアクセスするので、負荷を下げるためにキャッシュしておく
+        _transform = transform;//Transformもキャッシュすると少しだけ負荷が下がる
         animator = GetComponent<Animator>();
         animator.applyRootMotion = false; //RootMotionを無効にする
 
         var input = GetComponent<PlayerInput>();
-    //Playerインプットのアクションマップから、移動とジャンプのアクションを取得する
-    input.currentActionMap.Enable();
-    _move = input.currentActionMap.FindAction("Move");
-    _jump = input.currentActionMap.FindAction("Jump");
+        //Playerインプットのアクションマップから、移動とジャンプのアクションを取得する
+        input.currentActionMap.Enable();
+        _move = input.currentActionMap.FindAction("Move");
+        _jump = input.currentActionMap.FindAction("Jump");
+    }
+
+    public void AddImpulse(Vector3 velocity, float duration)
+    {
+        if (impulseCo != null) StopCoroutine(impulseCo);
+        impulseCo = StartCoroutine(ImpulseRoutine(velocity, duration));
+
+        //if (_impulse != null)
+        //{
+        //    StopCoroutine(_impulse);
+        //}
+        //_impulse = StartCoroutine(ImpulseRoutine(velocity, duration));
+    }
+
+    IEnumerator ImpulseRoutine(Vector3 velocity, float duration)
+    {
+        ////水平部分だけ使用する(上下は重力に任せる)
+        //velocity = Vector3.ProjectOnPlane(velocity, Vector3.up);
+
+        //ExternalVelocity = velocity;
+        //float t = 0f;
+        //while (t < duration)
+        //{
+        //    t += Time.deltaTime;
+        //    yield return null;
+        //}
+        //ExternalVelocity = Vector3.zero;
+        ExternalVelocity = velocity;
+        yield return new WaitForSeconds(duration);
+        ExternalVelocity = Vector3.zero;
+
     }
 
     // Update is called once per frame
@@ -48,24 +84,25 @@ public class PlayerController : MonoBehaviour
         Vector2 mv = _move.ReadValue<Vector2>();
         //Camera基準の移動方向
         Transform cam = Camera.main.transform;
-        Vector3 camForward = Vector3.Scale(cam.forward,new Vector3(1,0,1)).normalized;
-        Vector3 camRight = Vector3.Scale(cam.right,new Vector3(1,0,1)).normalized;
-        Vector3 dir = camForward*mv.y+camRight*mv.x;
-        if(dir.sqrMagnitude > 1f) dir.Normalize();
+        Vector3 camForward = Vector3.Scale(cam.forward, new Vector3(1, 0, 1)).normalized;
+        Vector3 camRight = Vector3.Scale(cam.right, new Vector3(1, 0, 1)).normalized;
+        Vector3 dir = camForward * mv.y + camRight * mv.x;
+        if (dir.sqrMagnitude > 1f) dir.Normalize();
 
         //移動
         float baseSpeed = state ? state.MoveSpeed : moveSpeed;
-        Vector3 horizontal = dir*(baseSpeed* SpeedMultiplier);
+        Vector3 horizontal = dir * (baseSpeed * SpeedMultiplier);
+        Vector3 total = horizontal + ExternalVelocity;
         _moveVelocity.x = horizontal.x;
         _moveVelocity.z = horizontal.z;
 
         //移動方向に向く
-        if(dir.sqrMagnitude > 0.0001f)
+        if (dir.sqrMagnitude > 0.0001f)
         {
-            Quaternion target =Quaternion.LookRotation(dir,Vector3.up);
-            _transform.rotation = Quaternion.Slerp(_transform.rotation,target,Time.deltaTime*10f);
+            Quaternion target = Quaternion.LookRotation(dir, Vector3.up);
+            _transform.rotation = Quaternion.Slerp(_transform.rotation, target, Time.deltaTime * 10f);
         }
-       
+
         ////移動方向に向く
         //_transform.LookAt(_transform.position + new Vector3(_moveVelocity.x, 0, _moveVelocity.z));
         if (characterController.isGrounded)
@@ -78,21 +115,34 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            //重力の計算
-            _moveVelocity.y += Physics.gravity.y * Time.deltaTime;
+            if (boostAction.isBoosting == true)
+            {
+                //重力の計算（ブースト中は重力軽減）
+                _moveVelocity.y += (Physics.gravity.y * 0.1f) * Time.deltaTime;
+            }
+
+            else
+            {
+                //重力の計算
+                _moveVelocity.y += Physics.gravity.y * Time.deltaTime;
+            }
         }
 
         //オブジェクトを動かす
         characterController.Move(_moveVelocity * Time.deltaTime);
 
         //animatorへ連動
-        float playerSpeed = new Vector2(_moveVelocity.x,_moveVelocity.z).magnitude;
-        animator.SetFloat("MoveSpeed",playerSpeed,0.15f,Time.deltaTime);
+        float playerSpeed = new Vector2(_moveVelocity.x, _moveVelocity.z).magnitude;
+        animator.SetFloat("MoveSpeed", playerSpeed, 0.15f, Time.deltaTime);
 
-        if(mv.sqrMagnitude>0.0001f)
+        if (mv.sqrMagnitude > 0.0001f)
         {
             LastMoveDir = dir.normalized;
         }
+        // ★ ここで ExternalVelocity を合成する
+        Vector3 final = _moveVelocity + ExternalVelocity;
 
+        // CharacterController なら：
+        characterController.Move(final * Time.deltaTime);
     }
 }

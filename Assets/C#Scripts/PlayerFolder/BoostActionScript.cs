@@ -16,6 +16,7 @@ public class BoostActionScript : MonoBehaviour
     [SerializeField] float drainPerSec = 25f;
     [SerializeField] float accelLerp = 10f;
     [SerializeField] float decelLerp = 8f;
+    [SerializeField] public bool isBoosting = false;
 
     private void Awake()
     {
@@ -55,11 +56,13 @@ public class BoostActionScript : MonoBehaviour
 
         if(westBoost&&stats.SpendBoost(drainPerSec))
         {
+            isBoosting = true;
             move.SpeedMultiplier = Mathf.Lerp(move.SpeedMultiplier, boostMultiplier, accelLerp*Time.deltaTime);   
         }
 
         else
         {
+            isBoosting = false;
             move.SpeedMultiplier = Mathf.Lerp(move.SpeedMultiplier, 1f, decelLerp*Time.deltaTime);
         }
     }
