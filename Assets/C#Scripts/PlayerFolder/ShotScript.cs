@@ -8,6 +8,7 @@ public class ShotScript : MonoBehaviour
     [Header("必須参照")]
     [SerializeField] Transform muzzle;
     [SerializeField] GameObject bulletPrefab;
+
     [Header("射撃設定")]
     [SerializeField,Tooltip("1秒間の発射数")] float fireRate = 8f;
     [SerializeField,Tooltip("弾速")] float bulletSpeed = 60f;
@@ -17,6 +18,13 @@ public class ShotScript : MonoBehaviour
     [Header("弾倉/リロード")]
     [SerializeField,Tooltip("弾倉容量")] int magazineSize = 30;
     [SerializeField,Tooltip("リロード時間")] float reloadTime = 2f;
+
+    [Header("エフェクト設定")]
+    [SerializeField] GameObject muzzleFlashEffect; //マズルフラッシュ
+    [SerializeField] AudioClip fireSound; //発射音(予定)
+    [SerializeField] float effectLifeTime =0.2f; //エフェクトの生存時間
+    AudioSource audioSource; 
+
     int currentAmmo;
     bool isReloading;
 
@@ -30,6 +38,7 @@ public class ShotScript : MonoBehaviour
         if (!muzzle) muzzle = transform;//念のため
         fireInterval = 1f / Mathf.Max(0.01f, fireRate);
         currentAmmo = magazineSize;
+
     }
 
     void Update()
@@ -93,7 +102,11 @@ public class ShotScript : MonoBehaviour
         }
         currentAmmo--;
         //エフェクト
-
+        if(muzzleFlashEffect!=null)
+        {
+            var flash = Instantiate(muzzleFlashEffect, muzzle.position, muzzle.rotation, muzzle);
+            Destroy(flash, effectLifeTime);
+        }
         return true;
     }
     Vector3 GetAimDirectionFromCamera(Camera cam)
