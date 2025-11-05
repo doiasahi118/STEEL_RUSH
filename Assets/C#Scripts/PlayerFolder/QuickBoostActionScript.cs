@@ -96,6 +96,7 @@ public class QuickBoostActionScript : MonoBehaviour
     /// <summary>direction はワールド空間。長さは無視され正規化されます。</summary>
     public void DoQuickBoost(Vector3 direction)
     {
+        Debug.Log("DoQuickBoost called");
         // クールダウン・多重実行中は無視
         if (busy || cooldownTimer > 0f) return;
 

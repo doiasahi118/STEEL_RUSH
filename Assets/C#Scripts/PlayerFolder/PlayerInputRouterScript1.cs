@@ -10,18 +10,22 @@ public class PlayerInputRoutineScript : MonoBehaviour
     [SerializeField] PlayerController controller; //Playerの移動・制御を担当するScript
     [SerializeField] QuickBoostActionScript quickBoostAction; //QuickBoostを担当するScript
     [SerializeField] PlayerStateScript state; //Playerの状態を管理するScript
-    [SerializeField]  ShotScript shooter; //射撃を担当するScript
+    [SerializeField] ShotScript shooter; //射撃を担当するScript
+    [SerializeField] MeleeScript melee; //近接攻撃を担当するScript
+
     private PlayerInput input;
     private InputAction actQuickBoost;
     private InputAction actFire;
     private InputAction actReload;
     private InputAction actRepair;
+    private InputAction actMelee;
 
     [Header("Action_Name")] //InputActionの名前
     [SerializeField] string quickBoostActionName = "QuickBoost";
     [SerializeField] string fireActionName = "Fire";
     [SerializeField] string reloadActionName = "Reload";
     [SerializeField] string repairActionName = "Repair";
+    [SerializeField] string meleeActionName = "MeleeAttack";
 
     //初期化処理
     void Awake()
@@ -33,6 +37,7 @@ public class PlayerInputRoutineScript : MonoBehaviour
         quickBoostAction??= GetComponent<QuickBoostActionScript>();
         state??= GetComponent<PlayerStateScript>();
         shooter??= GetComponent<ShotScript>();
+        melee??= GetComponent<MeleeScript>();
     }
 
     //有効化時:アクションマップを取得してイベントを登録
@@ -50,13 +55,13 @@ public class PlayerInputRoutineScript : MonoBehaviour
         actFire = actionMap.FindAction(fireActionName);
         actReload = actionMap.FindAction(reloadActionName);
         actRepair = actionMap.FindAction(repairActionName);
-
+        actMelee = actionMap.FindAction(meleeActionName);
         //イベント登録
         //performed:アクションが実行されたときに呼ばれる
         //canceled:はボタンが話された瞬間によばれる
 
         //クイックブースト
-        if(actQuickBoost != null)
+        if (actQuickBoost != null)
         {
             actQuickBoost.performed += OnQuickBoost;
         }
@@ -77,6 +82,18 @@ public class PlayerInputRoutineScript : MonoBehaviour
         {
             actRepair.performed -=_=>state?.TryRepair();
         }
+
+        if(actMelee != null)
+        {
+           actMelee.performed -=_=>melee?.StartAttack();
+            actMelee.canceled -=_=>melee?.EndAttack();
+        }
+
+        else
+        {
+            Debug.LogWarning($"[InputRouter]Action'{meleeActionName}'が見つかりません");
+        }
+
     }
 
     //クイックブースト処理

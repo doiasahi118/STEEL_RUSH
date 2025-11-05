@@ -5,55 +5,82 @@ using UnityEngine.InputSystem;
 
 public class MeleeScript : MonoBehaviour
 {
+    [Header("必須参照")]
+    [SerializeField] Transform trs;
+    [SerializeField] GameObject breadPrefab;
     [Header("攻撃設定")]
-    [SerializeField] public float attackRange = 2.0f; // 攻撃範囲
-    [SerializeField] float capsuleRadius = 0.7f;
-    [SerializeField]private float nextAttackTime = 0.5f; // 次に攻撃できる時間
-    [SerializeField] LayerMask targetMask;
+    [SerializeField,Tooltip("剣速")]float meleeSpeed = 30f;
+    [Header("クールタイム")]
+    [SerializeField, Tooltip("近接攻撃クールタイム")] float meleeCooldown = 1f;
 
-    PlayerStateScript stats;
-    private bool canAttack = false;
-    private Transform cam;
+    [Header("エフェクト設定")]
+    [SerializeField] GameObject meleeEffect; //近接攻撃エフェクト
+    [SerializeField] AudioClip meleeSound; //近接攻撃音(予定)
+    [SerializeField] float effectLifeTime = 0.5f; //エフェクトの生存時間
+    AudioSource audioSource;
+    //内部状態
+    bool isSlash;
+    float slashInterval; //1秒あたりの攻撃数の感覚
+    float slashTimer; //次攻撃までのタイマー
 
-
-    // Start is called before the first frame update
-    void Start()
+    private void Awake()
     {
-        stats = GetComponent<PlayerStateScript>();
-        cam = Camera.main.transform;
+        if (!trs) trs = transform;//念のため
+        slashInterval = 1f / Mathf.Max(0.01f, meleeSpeed);
     }
 
-    public void OnMeleeAttack(InputValue value)
+    void Update()
     {
-        if (!value.isPressed || !canAttack) return;
-        StartCoroutine(AttackRoutine());
-    }
-
-    private System.Collections.IEnumerator AttackRoutine()
-    {
-        canAttack = false;
-        //攻撃処理
-        Vector3 start = transform.position + Vector3.up*1.0f;//キャラクターの胸当たり
-        Vector3 dir = cam.forward;
-
-        if(Physics.SphereCast(start,1.0f,dir,out RaycastHit hit, attackRange,targetMask))
+        if (!isSlash) return;
+        //押しっぱなしで連続攻撃
+        slashTimer += Time.deltaTime;
+        while (slashTimer >= slashInterval)
         {
-            Debug.Log($"Melee {hit.collider.name}");
-            var target = hit.collider.GetComponent<EnemyHealthScript>();
-            if (target != null)
+            slashTimer -= slashInterval;
+            if (!TryMeleeOnce())
             {
-                target.TakeDamage(stats.AttackPower);
+                //クールタイム終了
+                break;
             }
         }
-        // 次の攻撃までのクールダウン
-        yield return new WaitForSeconds(nextAttackTime);
-        canAttack = true;
     }
 
-    void OnDrawGizmosSelected()
+    bool TryMeleeOnce()
     {
-     Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position + Vector3.up*1.2f, capsuleRadius);
+        //近接攻撃処理
+        //エフェクト生成
+        if (meleeEffect)
+        {
+            GameObject effect = Instantiate(meleeEffect, trs.position, trs.rotation);
+            Destroy(effect, effectLifeTime);
+        }
+        //音再生
+        if (meleeSound)
+        {
+            if (!audioSource) audioSource = gameObject.AddComponent<AudioSource>();
+            audioSource.PlayOneShot(meleeSound);
+        }
+        
+        if (breadPrefab)
+        {
+            GameObject bread = Instantiate(breadPrefab, trs.position + trs.forward * 1f, trs.rotation);
+            Rigidbody rb = bread.GetComponent<Rigidbody>();
+            if (rb)
+            {
+                rb.velocity = trs.forward * meleeSpeed;
+            }
+        }
+        return true;
     }
 
+    public void StartAttack()
+    {
+        Debug.Log("Melee Attack Started");
+        isSlash = true;
+    }
+
+    public void EndAttack()
+    {
+        isSlash = false;
+    }
 }
