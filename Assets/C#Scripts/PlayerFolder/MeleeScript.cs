@@ -9,9 +9,10 @@ public class MeleeScript : MonoBehaviour
     [SerializeField] Transform trs;
     [SerializeField] GameObject breadPrefab;
     [Header("攻撃設定")]
-    [SerializeField,Tooltip("剣速")]float meleeSpeed = 30f;
+    [SerializeField,Tooltip("剣速")]float meleeSpeed = 30.0f;
     [Header("クールタイム")]
-    [SerializeField, Tooltip("近接攻撃クールタイム")] float meleeCooldown = 1f;
+    [SerializeField, Tooltip("近接攻撃クールタイム")] 
+    float meleeCooldown = 0.25f;
 
     [Header("エフェクト設定")]
     [SerializeField] GameObject meleeEffect; //近接攻撃エフェクト
@@ -20,28 +21,38 @@ public class MeleeScript : MonoBehaviour
     AudioSource audioSource;
     //内部状態
     bool isSlash;
-    float slashInterval; //1秒あたりの攻撃数の感覚
-    float slashTimer; //次攻撃までのタイマー
-
+    float repeatTimer; //1秒あたりの攻撃数の感覚
+    float interval; //次攻撃までのタイマー
+    float coolDownTimer;  //クールダウン
     private void Awake()
     {
         if (!trs) trs = transform;//念のため
-        slashInterval = 1f / Mathf.Max(0.01f, meleeSpeed);
+        interval = 1f / Mathf.Max(0.01f, meleeSpeed);
     }
 
     void Update()
     {
-        if (!isSlash) return;
-        //押しっぱなしで連続攻撃
-        slashTimer += Time.deltaTime;
-        while (slashTimer >= slashInterval)
+        //クールダウンの減算
+        if(coolDownTimer>0)
         {
-            slashTimer -= slashInterval;
-            if (!TryMeleeOnce())
-            {
-                //クールタイム終了
-                break;
-            }
+            coolDownTimer -= Time.deltaTime;
+        }
+        if (!isSlash)
+        {
+            return;
+        }
+        //押しっぱなしで連続攻撃
+        repeatTimer -= Time.deltaTime;
+        if (repeatTimer <= 0f)
+        {
+            TryMeleeOnce();
+            coolDownTimer -= meleeCooldown;
+
+        }
+        else
+        {
+            //クールタイム中なら次フレームでもう一度チェック
+            repeatTimer -=0.01f;
         }
     }
 
@@ -63,12 +74,15 @@ public class MeleeScript : MonoBehaviour
         
         if (breadPrefab)
         {
-            GameObject bread = Instantiate(breadPrefab, trs.position + trs.forward * 1f, trs.rotation);
-            Rigidbody rb = bread.GetComponent<Rigidbody>();
-            if (rb)
-            {
-                rb.velocity = trs.forward * meleeSpeed;
-            }
+            //GameObject bread = Instantiate(breadPrefab, trs.position + trs.forward * 1f, trs.rotation);
+            //Rigibody rb = bread.GetComponent<Rigibody>();
+            //if (rb)
+            //{
+            //    rb.velocity = trs.forward * meleeSpeed;
+            //}
+            var bread = Instantiate(breadPrefab, trs.position + trs.forward * 1f, trs.rotation);
+            if (bread.TryGetComponent<Rigidbody>(out var rb))
+                rb.velocity = trs.forward * 30.0f;
         }
         return true;
     }
@@ -76,11 +90,22 @@ public class MeleeScript : MonoBehaviour
     public void StartAttack()
     {
         Debug.Log("Melee Attack Started");
+        if (coolDownTimer > 0f)
+        {
+            return;
+        }
+
+        TryMeleeOnce();
+        coolDownTimer = meleeCooldown;
+
+        //連撃用のタイマーの初期化(すぐ次が出ないようIntervalをSet)
+        repeatTimer = interval;
         isSlash = true;
     }
 
     public void EndAttack()
     {
+        Debug.Log("Melee canceled");
         isSlash = false;
     }
 }

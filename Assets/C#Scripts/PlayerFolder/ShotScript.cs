@@ -23,7 +23,7 @@ public class ShotScript : MonoBehaviour
     [SerializeField] GameObject muzzleFlashEffect; //マズルフラッシュ
     [SerializeField] AudioClip fireSound; //発射音(予定)
     [SerializeField] float effectLifeTime =0.2f; //エフェクトの生存時間
-    AudioSource audioSource; 
+    //AudioSource audioSource; 
 
     int currentAmmo;
     bool isReloading;
@@ -60,23 +60,6 @@ public class ShotScript : MonoBehaviour
         }
     }
 
-    //public void OnFire(InputValue v)
-    //{
-    //    if (!v.isPressed) return;
-    //    if (Time.time < nexTime) return;
-    //    nexTime = Time.time + 1f / fireRate;
-
-    //    //Cameraの向こうに弾を飛ばす
-    //    var cam = Camera.main;
-    //    Vector3 dir = cam.transform.forward; 
-
-    //    //発射位置をカメラに合わせる
-    //    muzzle.rotation =Quaternion.LookRotation(dir,Vector3.up);
-    //    Instantiate(BulletPrefab, muzzle.position, muzzle.rotation);
-    //}
-    ///<summary>
-    ///一発発射。成功したらtrue、弾切れならfalseを返す
-    ///<summary>
     bool TryFireOnce()
     {
         if (currentAmmo <= 0) return false;
@@ -161,5 +144,5 @@ public class ShotScript : MonoBehaviour
 
     public int CurrentAmmo => currentAmmo;
     public int MagazineSize => magazineSize;
-    public bool isReloadingNow => isReloading;
+    public bool IsReloadingNow => isReloading;
 }
