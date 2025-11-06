@@ -6137,6 +6137,7 @@ MonoBehaviour:
   drainPerSec: 25
   accelLerp: 10
   decelLerp: 8
+  isBoosting: 0
 --- !u!114 &1276976153
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6185,8 +6186,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e7676302d7fb864b96408f85ac61f39, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  boostForce: 100
-  boostDuration: 0.2
+  dashSpeed: 300
+  dashDuration: 0.2
   cooldown: 2
   boostCost: 25
 --- !u!114 &1276976161
@@ -6202,20 +6203,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   controller: {fileID: 1276976155}
-  booster: {fileID: 1276976152}
-  quickBoost: {fileID: 1276976158}
-  lockOn: {fileID: 1276976153}
-  shooter: {fileID: 1276976146}
+  quickBoostAction: {fileID: 1276976158}
   state: {fileID: 1276976151}
-  melee: {fileID: 0}
-  quickBoostRightActionName: QuickBoost
-  LookOnNextName: LookOnNext
-  LookOnPrevName: LookOn
-  repairActionName: Repair
-  interactActionName: Interact
-  meleeActionName: MeleeAttack
-  reloadActionName: Reload
+  shooter: {fileID: 1276976146}
+  quickBoostActionName: QuickBoost
   fireActionName: Fire
+  reloadActionName: Reload
+  repairActionName: Repair
 --- !u!1001 &1280984735
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -10411,6 +10405,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 497244674721858576, guid: 9c2d973c667dc2c488a9b1c02a27df6f, type: 3}
+      propertyPath: m_NotificationBehavior
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 5571127036421081763, guid: 9c2d973c667dc2c488a9b1c02a27df6f, type: 3}
       propertyPath: moveSpeed
       value: 0

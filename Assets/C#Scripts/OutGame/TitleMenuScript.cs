@@ -11,7 +11,7 @@ public class TitleMenuScript : MonoBehaviour
     //    Debug.Log("Game_Start");
     //    SceneManager.LoadScene("Game");
     //}
-    [SerializeField] string gameSceneName = "Game";
+    [SerializeField] string gameSceneName = "MainGame";
 
     public void StartButton()
     {

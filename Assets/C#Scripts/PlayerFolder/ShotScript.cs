@@ -8,6 +8,7 @@ public class ShotScript : MonoBehaviour
     [Header("必須参照")]
     [SerializeField] Transform muzzle;
     [SerializeField] GameObject bulletPrefab;
+
     [Header("射撃設定")]
     [SerializeField,Tooltip("1秒間の発射数")] float fireRate = 8f;
     [SerializeField,Tooltip("弾速")] float bulletSpeed = 60f;
@@ -17,6 +18,13 @@ public class ShotScript : MonoBehaviour
     [Header("弾倉/リロード")]
     [SerializeField,Tooltip("弾倉容量")] int magazineSize = 30;
     [SerializeField,Tooltip("リロード時間")] float reloadTime = 2f;
+
+    [Header("エフェクト設定")]
+    [SerializeField] GameObject muzzleFlashEffect; //マズルフラッシュ
+    [SerializeField] AudioClip fireSound; //発射音(予定)
+    [SerializeField] float effectLifeTime =0.2f; //エフェクトの生存時間
+    //AudioSource audioSource; 
+
     int currentAmmo;
     bool isReloading;
 
@@ -30,6 +38,7 @@ public class ShotScript : MonoBehaviour
         if (!muzzle) muzzle = transform;//念のため
         fireInterval = 1f / Mathf.Max(0.01f, fireRate);
         currentAmmo = magazineSize;
+
     }
 
     void Update()
@@ -51,23 +60,6 @@ public class ShotScript : MonoBehaviour
         }
     }
 
-    //public void OnFire(InputValue v)
-    //{
-    //    if (!v.isPressed) return;
-    //    if (Time.time < nexTime) return;
-    //    nexTime = Time.time + 1f / fireRate;
-
-    //    //Cameraの向こうに弾を飛ばす
-    //    var cam = Camera.main;
-    //    Vector3 dir = cam.transform.forward; 
-
-    //    //発射位置をカメラに合わせる
-    //    muzzle.rotation =Quaternion.LookRotation(dir,Vector3.up);
-    //    Instantiate(BulletPrefab, muzzle.position, muzzle.rotation);
-    //}
-    ///<summary>
-    ///一発発射。成功したらtrue、弾切れならfalseを返す
-    ///<summary>
     bool TryFireOnce()
     {
         if (currentAmmo <= 0) return false;
@@ -93,7 +85,11 @@ public class ShotScript : MonoBehaviour
         }
         currentAmmo--;
         //エフェクト
-
+        if(muzzleFlashEffect!=null)
+        {
+            var flash = Instantiate(muzzleFlashEffect, muzzle.position, muzzle.rotation, muzzle);
+            Destroy(flash, effectLifeTime);
+        }
         return true;
     }
     Vector3 GetAimDirectionFromCamera(Camera cam)
@@ -148,5 +144,5 @@ public class ShotScript : MonoBehaviour
 
     public int CurrentAmmo => currentAmmo;
     public int MagazineSize => magazineSize;
-    public bool isReloadingNow => isReloading;
+    public bool IsReloadingNow => isReloading;
 }
