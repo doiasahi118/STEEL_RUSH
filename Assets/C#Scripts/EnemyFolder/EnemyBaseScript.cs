@@ -1,13 +1,16 @@
+using MaykerStudio.Demo;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class EnemyBaseScript : MonoBehaviour
 {
     [Header("HP")]
     [SerializeField,Tooltip("最大HP")] int maxHP = 100;
-    [SerializeField,Tooltip("被弾後のHP")]float hitCoolDown;
-    [SerializeField, Tooltip("受けるダメージ倍率")] float apDamage;
+    [SerializeField,Tooltip("被弾後のHP")]float hitCoolDown=0.4f;
+    [SerializeField, Tooltip("受けるダメージ倍率")] float apDamage=1.0f;
 
     [Header("死亡処理")]
     [SerializeField,Tooltip("死亡フラグから消滅までの時間")] float deathDelay=0.5f;
@@ -27,40 +30,93 @@ public class EnemyBaseScript : MonoBehaviour
 
     public bool IsAlive =>CurrentHP > 0;
     bool canBeHit = true;
-   
     //攻撃を受けるフラグ
     bool conHit = true;
 
-    void Start()
+    //UIやAI連動用イベント
+    public event Action<int, int> OnHpChanged;
+    public event Action<int> OnDamage;
+    public event Action OnDeath;
+
+    //参照
+    Animator anim;
+    NavMeshAgent agent;
+    Collider[] colliders;
+
+    void Awake()
     {
+        anim = GetComponent<Animator>();
+        agent = GetComponent<NavMeshAgent>();
+        colliders = GetComponentsInChildren<Collider>(true);
         Init();
+    }
+
+    void OnValidate()
+    {
+        if (maxHP < 1) { maxHP = 1;}
+        if (hitCoolDown < 0.0f) {hitCoolDown = 0.0f;}
+        if (apDamage<=0.0f) apDamage = 1.0f;
+        if (deathDelay<0.0f) deathDelay = 0.0f;
     }
 
     //初期化処理
     public void Init()
     {
         CurrentHP = maxHP;
+        canBeHit = true;
+        OnHpChanged?.Invoke(CurrentHP, maxHP);
     }
 
-    // Update is called once per frame
-    void Update()
+    //ダメージ受け取り
+    public void TakeDamage(int amount, Vector3 hitPoint, Vector3 hitNormal, GameObject attcker = null)
     {
-        
+        if (!IsAlive || !canBeHit) { return; }
+        //実ダメージ
+        int dmg = Mathf.Max(0, Mathf.RoundToInt(amount * apDamage));
+        if (dmg <= 0) {return;}
+        //視覚/音
+        if (hitEffect) Instantiate(hitEffect, hitPoint, Quaternion.LookRotation(hitNormal));
+        if (hitSE) AudioSource.PlayClipAtPoint(hitSE, hitPoint);
+
+        CurrentHP = Mathf.Max(0, CurrentHP - dmg);
+        OnHpChanged?.Invoke(CurrentHP, maxHP);
+        OnDamage?.Invoke(dmg);
+
+        if(CurrentHP<=0)
+        {
+            StartCoroutine(DieRoutine());
+            return;
+        }
+        //無敵時間(多段ヒット抑制)
+        StartCoroutine(HitCooldownRoutine());
     }
 
-    //死亡処理
-    void OnDead()
+    IEnumerator HitCooldownRoutine()
     {
-        Debug.Log(gameObject.name + "を倒しました");
+        canBeHit = false;
+        yield return new WaitForSeconds(hitCoolDown);
+        canBeHit= true;
+    }
+
+    IEnumerator DieRoutine()
+    {
+        canBeHit = false;
+        if (agent){agent.isStopped = true;}
+        if (anim){anim.SetTrigger("Die");}
+        foreach(var col in colliders) col.enabled = false;
+
+        //エフェクト/音
+        if (deathEffect) Instantiate(deathEffect, transform.position, transform.rotation);
+        if (deathSE) AudioSource.PlayClipAtPoint(deathSE, transform.position);
+        //OnDead?.Invoke();
+        yield return new WaitForSeconds(deathDelay);
         Destroy(gameObject);
     }
 
-    //攻撃ヒット後次の攻撃が当たるまでの待機処理時間
-    IEnumerator HitWait()
+    public void Heal(int amount)
     {
-        //指定時間待機してフラグを戻す
-        conHit = false;
-        yield return new WaitForSeconds(0.5f);
-        conHit = true;
+        if (!IsAlive) { return; }
+        CurrentHP = Mathf.Min(maxHP, CurrentHP + Mathf.Abs(amount));
+        OnHpChanged?.Invoke(CurrentHP, maxHP);
     }
 }
