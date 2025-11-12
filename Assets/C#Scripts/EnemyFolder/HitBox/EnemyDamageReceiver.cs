@@ -4,15 +4,16 @@ using UnityEngine;
 
 public class EnemyDamageReceiver : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    EnemyBaseScript enemy;
+
+    public void Awake()
     {
-        
+        enemy = GetComponent<EnemyBaseScript>();
     }
 
-    // Update is called once per frame
-    void Update()
+    //HitData‚ğˆø”‚Æ‚µ‚Äó‚¯æ‚é
+    public void ReceiveDamage()
     {
-        
+
     }
 }

@@ -2,17 +2,19 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class HitData : MonoBehaviour
+[System.Serializable]
+public struct HitData
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    public int damage;
+    public Vector3 hitPoint;
+    public Vector3 hitNormal;
+    public GameObject attacker;
 
-    // Update is called once per frame
-    void Update()
+    public HitData(int dmg ,Vector3 point, Vector3 normal, GameObject source)
     {
-        
+        damage = dmg;
+        hitPoint = point;
+        hitNormal = normal;
+        attacker = source;
     }
 }

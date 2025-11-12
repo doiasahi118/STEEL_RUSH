@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class EnemyBaseScript : MonoBehaviour
+public class EnemyBaseScript : MonoBehaviour,IDamageable
 {
     [Header("HP")]
     [SerializeField,Tooltip("ç≈ëÂHP")] int maxHP = 100;
@@ -118,5 +118,10 @@ public class EnemyBaseScript : MonoBehaviour
         if (!IsAlive) { return; }
         CurrentHP = Mathf.Min(maxHP, CurrentHP + Mathf.Abs(amount));
         OnHpChanged?.Invoke(CurrentHP, maxHP);
+    }
+
+    public void ApplyDamage(HitData hit)
+    {
+        TakeDamage(hit.damage, hit.hitPoint, hit.hitNormal, hit.attacker);
     }
 }

@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerStateScript : MonoBehaviour
+public class PlayerStateScript : MonoBehaviour,IDamageable
 {
     [Header("‘Ï‹v’l(AP)")]
     [SerializeField] float maxAP = 1000f;
@@ -94,5 +94,10 @@ public class PlayerStateScript : MonoBehaviour
     {
         Boost = Mathf.Min(maxBoost, Boost + amount);
         OnBoostChanged?.Invoke(Boost, maxBoost);
+    }
+
+    public void ApplyDamage(HitData hit)
+    {
+        TakeDamage(hit.damage);
     }
 }
