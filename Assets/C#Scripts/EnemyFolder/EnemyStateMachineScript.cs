@@ -95,6 +95,7 @@ public class EnemyStateMachineScript : MonoBehaviour
                 if (usNavMesh && agent) { agent.isStopped = true;agent.ResetPath();}
                 break;
             case EnemyState.Chase:
+                move.SetTarget(player);
                 break;
             case EnemyState.Attack:
                 _attackTimer = 0f;
