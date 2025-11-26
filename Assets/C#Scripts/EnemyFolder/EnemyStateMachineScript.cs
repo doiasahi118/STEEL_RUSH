@@ -16,7 +16,7 @@ public enum EnemyState
 {
     Patrol,
     Chase,
-    Attack,
+    Shot,
     Dead
 }
 
@@ -37,37 +37,99 @@ public class EnemyStateMachineScript : MonoBehaviour
 
     [Header("ˆÚ“®")]
     [SerializeField,Tooltip("NavMashAgent‚ğg‚Á‚Ä’ÇÕ‚ª‚Å‚«‚é(”CˆÓ)")]
-    bool usNavMesh = true;
+    bool useNavMesh = true;
     [SerializeField] float stopDistance = 1.0f;
 
     [Header("QÆ(”CˆÓ)")]
     [SerializeField] EnemyMove move;
-    [SerializeField] EnemyAttacks attacks;
+    [SerializeField] EnemyShot shot;
     [SerializeField] NavMeshAgent agent;
 
-    EnemyBaseScript E_Base;
+    EnemyBaseScript enemyBase;
     public EnemyState currentState { get; private set; } =EnemyState.Patrol;
-    float _attackTimer = 0.0f;
+   
     // Start is called before the first frame update
     void Awake()
     {
-       E_Base = GetComponent<EnemyBaseScript>();
+       enemyBase = GetComponent<EnemyBaseScript>();
        if(!move) move = GetComponent<EnemyMove>();
-       if(!attacks) attacks = GetComponent<EnemyAttacks>();
+       if(!shot) shot = GetComponent<EnemyShot>();
        if(!agent) agent = GetComponent<NavMeshAgent>();
+       if(shot&&player)shot.SetTarget(player);
 
-        //€–S‚µ‚½‚çDead‚Ö
-        E_Base.OnDeath += () => ChangeState(EnemyState.Dead);
+       if(shot&&player)
+        {
+            ChangeState(EnemyState.Chase);
+        }
     }
-    void Start()
-    {
-        
-    }
-
+   
     // Update is called once per frame
     void Update()
     {
-        
+        if (!player || !enemyBase.IsAlive)
+        {
+            return;
+        }
+
+        float dist = Vector3.Distance(player.position, transform.position);
+
+        switch(currentState)
+            {
+            case EnemyState.Patrol:
+                UpdatePatrol(dist);
+                break;
+            case EnemyState.Chase:
+                UpdateChase(dist);
+                break;
+            case EnemyState.Shot:
+                UpdateShot(dist);
+                break;
+            case EnemyState.Dead:
+                //‰½‚à‚µ‚È‚¢
+                break;
+        }
+    }
+
+    void UpdatePatrol(float dist)
+    {
+        //‚±‚±‚Å‚Í‚Ü‚¾‚¤‚ë‚Â‚­‚¾‚¯(¡‚Í‰½‚à‚µ‚È‚¢)
+        if(dist<=chaseDistance)
+        {
+            ChangeState(EnemyState.Chase);
+        }
+    }
+
+    void UpdateChase(float dist)
+    {
+        if(useNavMesh&&agent)
+        {
+            agent.isStopped = false;
+            agent.stoppingDistance = stopDistance;
+            agent.SetDestination(player.position);
+        }
+
+        if(dist<=attackDistance)
+        {
+            ChangeState(EnemyState.Shot);
+        }
+    }
+
+    void UpdateShot(float dist)
+    {
+        //UŒ‚’†‚Í‚»‚Ìê‚ÅPlayer‚Ì‚Ù‚¤‚ğŒü‚­
+        if(useNavMesh && agent)
+        {
+            agent.isStopped = true;
+        }
+        //…•½‚¾‚¯Œü‚­
+        Vector3 lookPos = new Vector3(player.position.x, transform.position.y, player.position.z);
+        transform.LookAt(lookPos);
+
+        //‹——£‚ª—£‚ê‚½‚ç’Ç‚¢‚©‚¯‚È‚¨‚·
+        if(dist>attackDistance*1.2f)//­‚µ—]—T‚ğ‚½‚¹‚é
+        {
+            ChangeState(EnemyState.Chase);
+        }
     }
 
     public void ChangeState(EnemyState nextState)
@@ -91,40 +153,43 @@ public class EnemyStateMachineScript : MonoBehaviour
     {
         switch(state)
         {
-            case EnemyState.Patrol:
-                if (usNavMesh && agent) { agent.isStopped = true;agent.ResetPath();}
-                break;
             case EnemyState.Chase:
-                move.SetTarget(player);
+                if(useNavMesh&&agent)agent.isStopped = false;
                 break;
-            case EnemyState.Attack:
-                _attackTimer = 0f;
+            case EnemyState.Shot:
+                Debug.Log("[EnemyState] Enter Shot",this);
+                shot?.StartAttack();
+                break;
+            case EnemyState.Dead:
+                if(useNavMesh&&agent)agent.isStopped = true;
                 break;
         }
     }
 
-    private void OnExit(EnemyState state)
+    void OnExit(EnemyState state)
     {
-        
-    }
-
-    void TrickIdle(float distSq)
-    {
-        if (!HasPlayer()) return;
-    }
-
-    float DistanceSqToPlayer()
-    {
-        if (!HasPlayer()) return float.MaxValue;
-        return (player.position - transform.position).sqrMagnitude;
+        switch(state)
+        {
+            case EnemyState.Shot:
+                shot?.StopAttack();
+                break;
+        }
     }
 
     bool HasPlayer() => player != null;
 
-    public void SetPlayer(Transform t) =>player = t;
     public void SetDistances(float chase, float attack)
     {
         chaseDistance = Mathf.Max(0, chaseDistance);
         attackDistance = Mathf.Clamp(attack,0.1f, attackDistance);
+    }
+    //•Ö—˜ƒƒ\ƒbƒh
+    public void SetPlayer(Transform t)
+    {
+        player = t;
+        if(shot&&player)
+        {
+            shot.SetTarget(player);
+        }
     }
 }
