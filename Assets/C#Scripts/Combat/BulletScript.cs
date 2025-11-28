@@ -80,6 +80,7 @@ public class BulletScript : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        
         if(hitOnce)
         {
             return;
@@ -102,10 +103,10 @@ public class BulletScript : MonoBehaviour
         var hit = new HitData(damage, hitPoint, hitNormal,owner? owner: gameObject);
 
         //Žó‚¯Žè‚É“`‚¦‚é(IDamageable)
-        var damageable = other.GetComponentInParent<IDamageable>();
-        if (damageable != null)
+        var receiver = other.GetComponentInParent<IDamageable>();
+        if (receiver != null)
         {
-            damageable.ApplyDamage(hit);
+            receiver.ApplyDamage(hit);
         }
 
         //Ž‹ŠoŒø‰Ê

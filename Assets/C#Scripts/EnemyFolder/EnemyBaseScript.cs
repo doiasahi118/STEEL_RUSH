@@ -67,29 +67,7 @@ public class EnemyBaseScript : MonoBehaviour,IDamageable
         OnHpChanged?.Invoke(CurrentHP, maxHP);
     }
 
-    //ダメージ受け取り
-    public void TakeDamage(int amount, Vector3 hitPoint, Vector3 hitNormal, GameObject attcker = null)
-    {
-        if (!IsAlive || !canBeHit) { return; }
-        //実ダメージ
-        int dmg = Mathf.Max(0, Mathf.RoundToInt(amount * apDamage));
-        if (dmg <= 0) {return;}
-        //視覚/音
-        if (hitEffect) Instantiate(hitEffect, hitPoint, Quaternion.LookRotation(hitNormal));
-        if (hitSE) AudioSource.PlayClipAtPoint(hitSE, hitPoint);
-
-        CurrentHP = Mathf.Max(0, CurrentHP - dmg);
-        OnHpChanged?.Invoke(CurrentHP, maxHP);
-        OnDamage?.Invoke(dmg);
-
-        if(CurrentHP<=0)
-        {
-            StartCoroutine(DieRoutine());
-            return;
-        }
-        //無敵時間(多段ヒット抑制)
-        StartCoroutine(HitCooldownRoutine());
-    }
+    
 
     IEnumerator HitCooldownRoutine()
     {
@@ -122,6 +100,32 @@ public class EnemyBaseScript : MonoBehaviour,IDamageable
 
     public void ApplyDamage(HitData hit)
     {
+        Debug.Log($"[EnemyBase] ApplyDamage {name} dmg={hit.damage} ");
         TakeDamage(hit.damage, hit.hitPoint, hit.hitNormal, hit.attacker);
+    }
+    //ダメージ受け取り
+    public void TakeDamage(int amount, Vector3 hitPoint, Vector3 hitNormal, GameObject attcker = null)
+    {
+        Debug.Log($"[EnemyBase] TakeDamage {name}amount={amount} HP(before)={CurrentHP})");
+        if (!IsAlive || !canBeHit) { return; }
+        //実ダメージ
+        int dmg = Mathf.Max(0, Mathf.RoundToInt(amount * apDamage));
+        if (dmg <= 0) {return;}
+        //視覚/音
+        if (hitEffect) Instantiate(hitEffect, hitPoint, Quaternion.LookRotation(hitNormal));
+        if (hitSE) AudioSource.PlayClipAtPoint(hitSE, hitPoint);
+
+        CurrentHP = Mathf.Max(0, CurrentHP - dmg);
+        OnHpChanged?.Invoke(CurrentHP, maxHP);
+        OnDamage?.Invoke(dmg);
+
+        if(CurrentHP<=0)
+        {
+            OnDeath?.Invoke();
+           Destroy(gameObject);
+            return;
+        }
+        //無敵時間(多段ヒット抑制)
+        StartCoroutine(HitCooldownRoutine());
     }
 }
