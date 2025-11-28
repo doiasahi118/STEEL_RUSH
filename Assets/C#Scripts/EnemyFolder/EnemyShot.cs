@@ -38,8 +38,7 @@ public class EnemyShot : MonoBehaviour
             Debug.LogWarning("[EnemyShot] muzzle ‚ªİ’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñ", this);
         if (!bulletPrefab)
             Debug.LogWarning("[EnemyShot] bulletPrefab ‚ªİ’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñ", this);
-       //fireInterval = 1f / Mathf.Max(0.01f, fireRate);
-       //fireTimer = fireInterval;
+      
    }
 
     public void StartAttack()
