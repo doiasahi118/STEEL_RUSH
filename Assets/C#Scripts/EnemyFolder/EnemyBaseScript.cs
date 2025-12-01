@@ -31,7 +31,7 @@ public class EnemyBaseScript : MonoBehaviour,IDamageable
     public bool IsAlive =>CurrentHP > 0;
     bool canBeHit = true;
     //攻撃を受けるフラグ
-    bool conHit = true;
+    public bool conHit = true;
 
     //UIやAI連動用イベント
     public event Action<int, int> OnHpChanged;
@@ -79,9 +79,9 @@ public class EnemyBaseScript : MonoBehaviour,IDamageable
     IEnumerator DieRoutine()
     {
         canBeHit = false;
-        if (agent){agent.isStopped = true;}
-        if (anim){anim.SetTrigger("Die");}
-        foreach(var col in colliders) col.enabled = false;
+        if (agent) { agent.isStopped = true; }
+        if (anim) { anim.SetTrigger("Die"); }
+        foreach (var col in colliders) col.enabled = false;
 
         //エフェクト/音
         if (deathEffect) Instantiate(deathEffect, transform.position, transform.rotation);
@@ -122,7 +122,7 @@ public class EnemyBaseScript : MonoBehaviour,IDamageable
         if(CurrentHP<=0)
         {
             OnDeath?.Invoke();
-           Destroy(gameObject);
+          StartCoroutine(DieRoutine());
             return;
         }
         //無敵時間(多段ヒット抑制)

@@ -14,7 +14,7 @@ public class EnemyShot : MonoBehaviour
     [SerializeField, Tooltip("ˆê•bŠÔ‚ÉŒ‚‚Â’e”")]
     float fireRate = 2.0f;
     [SerializeField,Tooltip("UŒ‚‰Â”\‹——£")]
-    float attackRange = 20.0f;
+    public float attackRange = 20.0f;
     [SerializeField,Tooltip("ƒ^[ƒQƒbƒg‚ª‚Ç‚ÌˆÊ’u‚ğ‘_‚¤‚©‚ğ•â³")]
     float aimOffset = 1.5f;
     [SerializeField,Tooltip("’e‚Ìƒoƒ‰‚Â‚«Šp“x")]
