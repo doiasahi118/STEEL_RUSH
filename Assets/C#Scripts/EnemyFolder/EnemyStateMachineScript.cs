@@ -33,7 +33,7 @@ public class EnemyStateMachineScript : MonoBehaviour
     [SerializeField,Tooltip("この距離内で攻撃開始")]
     float attackDistance = 30.5f;
     [SerializeField, Tooltip("攻撃のクールダウン")]
-    float attackInterval = 1.0f;
+    public float attackInterval = 1.0f;
 
     [Header("移動")]
     [SerializeField,Tooltip("NavMashAgentを使って追跡ができる(任意)")]
