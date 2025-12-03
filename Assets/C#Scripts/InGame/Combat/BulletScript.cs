@@ -97,7 +97,7 @@ public class BulletScript : MonoBehaviour
         }
 
         //–½’†î•ñì¬
-        Vector3 hitPoint = other.ClosestPoint(prevPos);
+        Vector3 hitPoint = other.ClosestPoint(transform.position);
         Vector3 hitNormal = (-rb.velocity).normalized;
 
         var hit = new HitData(damage, hitPoint, hitNormal,owner? owner: gameObject);
