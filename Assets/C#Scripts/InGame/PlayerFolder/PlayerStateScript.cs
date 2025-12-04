@@ -35,11 +35,14 @@ public class PlayerStateScript : MonoBehaviour,IDamageable
     public event Action<float, float> OnBoostChanged;//åªç›ílÅAç≈ëÂíl
     public event Action OnPlayerDead;
 
+    public bool DeathFlag =false;
+
     private void Awake()
     {
         AP = maxAP;
         RepairCharge = maxRepairCharge;
         Boost = maxBoost;
+        DeathFlag = false;
     }
 
     // Update is called once per frame
@@ -66,8 +69,7 @@ public class PlayerStateScript : MonoBehaviour,IDamageable
         OnAPChanged?.Invoke(AP, maxAP);
         if (AP <= 0f)
         {
-            //éÄñS
-            OnPlayerDead?.Invoke();
+            Death(); ;   
         }
     }
 
@@ -99,5 +101,12 @@ public class PlayerStateScript : MonoBehaviour,IDamageable
     public void ApplyDamage(HitData hit)
     {
         TakeDamage(hit.damage);
+    }
+
+    public void Death()
+    {
+        OnPlayerDead?.Invoke();
+        DeathFlag = true;
+        Destroy(gameObject);
     }
 }
