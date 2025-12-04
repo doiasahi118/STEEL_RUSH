@@ -4506,7 +4506,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.2614561, y: -0.013168233, z: 0.0035673475, w: 0.96511894}
+  m_LocalRotation: {x: 0.2614561, y: -0.013168166, z: 0.0035673296, w: 0.96511894}
   m_LocalPosition: {x: -28.877226, y: 7.47, z: -183.49832}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -6222,6 +6222,7 @@ MonoBehaviour:
   AttackPower: 30
   MoveSpeed: 30
   jumpHeight: 15
+  DeathFlag: 0
 --- !u!114 &1276976152
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8429,6 +8430,10 @@ PrefabInstance:
       propertyPath: player
       value: 
       objectReference: {fileID: 1276976144}
+    - target: {fileID: 6813679505572848126, guid: dc4f0a0a0bac70a468c847f1015a2935, type: 3}
+      propertyPath: attackDistance
+      value: 40
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -10670,11 +10675,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6241013580666702916, guid: 33ca99bea76f0ba46b7be578b805a066, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0.013168218
+      value: -0.013168184
       objectReference: {fileID: 0}
     - target: {fileID: 6241013580666702916, guid: 33ca99bea76f0ba46b7be578b805a066, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0.003567343
+      value: 0.0035673338
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
