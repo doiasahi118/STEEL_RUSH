@@ -14,5 +14,11 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/Game.unity
     guid: 6ab2070fa5ddaf14fa9085ffdfb2a45f
+  - enabled: 1
+    path: Assets/Scenes/GameOverSeen.unity
+    guid: 650349acba044e8408ddcb1cbc2a758f
+  - enabled: 1
+    path: Assets/Scenes/Clear.unity
+    guid: abc80295edd05c140a12ce63b3ee36ad
   m_configObjects:
     com.unity.input.settings: {fileID: 11400000, guid: 064ebec84205bd1458d32c459ccfe68c, type: 2}
