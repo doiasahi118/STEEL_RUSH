@@ -2,6 +2,7 @@ using MaykerStudio.Demo;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -38,6 +39,8 @@ public class EnemyBaseScript : MonoBehaviour,IDamageable
     public event Action<int> OnDamage;
     public event Action OnDeath;
 
+    private PlayerStateScript state;
+
     //éQè∆
     Animator anim;
     NavMeshAgent agent;
@@ -45,6 +48,7 @@ public class EnemyBaseScript : MonoBehaviour,IDamageable
 
     void Awake()
     {
+        state = GetComponent<PlayerStateScript>();
         anim = GetComponent<Animator>();
         agent = GetComponent<NavMeshAgent>();
         colliders = GetComponentsInChildren<Collider>(true);
@@ -121,6 +125,7 @@ public class EnemyBaseScript : MonoBehaviour,IDamageable
 
         if(CurrentHP<=0)
         {
+            state.playerKillCount= + 1;
             OnDeath?.Invoke();
           StartCoroutine(DieRoutine());
             return;

@@ -12,7 +12,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] PlayerStateScript state;
     public bool GameClearFlag = false;
     public bool playerDead =false;
-    [SerializeField] string gameSceneName = "GameOverSeen";
+    [SerializeField] string gameOverSceneName = "GameOverSeen";
+    [SerializeField] string gameClearSceneName = "GameClearSeen";
     private void Awake()
     {
         state=GetComponent<PlayerStateScript>();
@@ -21,14 +22,26 @@ public class GameManager : MonoBehaviour
     public void GameOver()
     {
             Debug.Log("GameOverSeenÇçƒê∂ÇµÇ‹Ç∑");
-            SceneManager.LoadScene(gameSceneName,LoadSceneMode.Single);
+            SceneManager.LoadScene(gameOverSceneName,LoadSceneMode.Single);
     }
+
+    public void GameClear()
+    {
+        Debug.Log("GameClearSceneÇçƒê∂Ç∑ÇÈ");
+        SceneManager.LoadScene(gameClearSceneName,LoadSceneMode.Single);
+    }
+
 
     public void Update()
     {
         if (state.DeathFlag == true)
         {
             GameOver();
+        }
+
+        if(state.playerClearFlag == true)
+        {
+            GameClear();
         }
     }
 }
