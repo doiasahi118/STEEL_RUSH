@@ -9,7 +9,7 @@ public class AudioManager : MonoBehaviour
 
     [SerializeField] private AudioSource _audioSource;
     private readonly Dictionary<string, AudioClip>
-        _clips=new Dictionary<string, AudioClip>();
+        _clips = new Dictionary<string, AudioClip>();
     public static AudioManager Instance
     {
         get {return instance;}       

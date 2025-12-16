@@ -36,7 +36,8 @@ public class PlayerStateScript : MonoBehaviour,IDamageable
     public event Action OnPlayerDead;
 
     public bool DeathFlag =false;
-
+    public bool playerClearFlag = false;
+    public int playerKillCount = 0;
     private void Awake()
     {
         AP = maxAP;
@@ -109,4 +110,13 @@ public class PlayerStateScript : MonoBehaviour,IDamageable
         DeathFlag = true;
         Destroy(gameObject);
     }
+
+    public void Clear()
+    {
+        if (playerKillCount <= 10)
+        {
+            playerClearFlag = true;
+        }
+    }
+
 }
